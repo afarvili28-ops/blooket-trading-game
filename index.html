@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blooket Trading Game</title>
+    <style>
+      :root {
+        --bg-1: #0b1020;
+        --bg-2: #101a2d;
+        --panel: rgba(18, 28, 44, 0.96);
+        --panel-2: rgba(24, 37, 58, 0.96);
+        --panel-3: rgba(37, 52, 74, 0.96);
+        --line: rgba(255, 255, 255, 0.08);
+        --text: #edf3ff;
+        --muted: #a7bad8;
+        --cyan: #67e8f9;
+        --purple: #a78bfa;
+        --green: #34d399;
+        --gold: #fbbf24;
+        --orange: #fb923c;
+        --red: #f87171;
+        --shadow: rgba(0, 0, 0, 0.35);
+        --common: #c4d0db;
+        --uncommon: #7fe3a0;
+        --rare: #6ca9ff;
+        --epic: #c597ff;
+        --legendary: #f4d35e;
+        --mythic: #ff7c7c;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        width: 100%;
+        min-height: 100%;
+        background: radial-gradient(circle at top, #1b2d4d, #0c1323 42%, #090d17 100%);
+        color: var(--text);
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        overflow: hidden;
+      }
+
+      body {
+        padding: 18px;
+      }
+
+      #app {
+        max-width: 1700px;
+        min-height: calc(100vh - 36px);
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 16px 22px;
+        background: rgba(17, 27, 42, 0.95);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        box-shadow: 0 12px 32px var(--shadow);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+      }
+
+      .brand-mark {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--cyan), var(--purple));
+        color: #08131d;
+        font-size: 1.4rem;
+        box-shadow: 0 12px 24px rgba(103, 232, 249, 0.35);
+      }
+
+      .stats-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .pill {
+        min-width: 110px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-weight: 800;
+      }
+
+      .main {
+        display: grid;
+        grid-template-columns: 360px minmax(0, 1fr) 420px;
+        gap: 18px;
+        flex: 1;
+        min-height: 0;
+      }
+
+      .panel {
+        background: rgba(18, 28, 44, 0.96);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        box-shadow: 0 12px 32px var(--shadow);
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .panel-header {
+        padding: 15px 16px;
+        border-bottom: 1px solid var(--line);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-weight: 900;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.025);
+      }
+
+      .inventory-list,
+      .online-list,
+      .market-list,
+      .trade-log {
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        overflow: auto;
+      }
+
+      .blook-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(10, 12, 18, 0.12));
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        position: relative;
+        transition: transform 0.15s ease, border-color 0.15s ease;
+      }
+
+      .blook-card:hover {
+        transform: translateY(-1px);
+        border-color: rgba(103, 232, 249, 0.5);
+      }
+
+      .blook-card.selected {
+        border-color: rgba(103, 232, 249, 0.8);
+        box-shadow: inset 0 0 0 1px rgba(103, 232, 249, 0.28);
+      }
+
+      .blook-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 1.8rem;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        flex-shrink: 0;
+      }
+
+      .blook-main {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .blook-name {
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .blook-info {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+
+      .rarity {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 0.67rem;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #091321;
+      }
+
+      .rarity.common { background: var(--common); }
+      .rarity.uncommon { background: var(--uncommon); }
+      .rarity.rare { background: var(--rare); }
+      .rarity.epic { background: var(--epic); }
+      .rarity.legendary { background: var(--legendary); }
+      .rarity.mythic { background: var(--mythic); }
+
+      .blook-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        border: none;
+        border-radius: 11px;
+        padding: 9px 12px;
+        cursor: pointer;
+        font-weight: 900;
+        letter-spacing: 0.02em;
+        transition: transform 0.12s ease, filter 0.12s ease;
+        color: #fff;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.07);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--cyan), var(--purple));
+        color: #07131d;
+      }
+
+      .btn-success {
+        background: linear-gradient(135deg, #12c88a, #0ea5e9);
+      }
+
+      .btn-warning {
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+      }
+
+      .btn-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid var(--line);
+      }
+
+      .center-panel {
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-height: 0;
+      }
+
+      .game-box {
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(8, 13, 21, 0.2));
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 18px;
+      }
+
+      .status-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+      }
+
+      .round-badge {
+        background: rgba(103, 232, 249, 0.12);
+        border: 1px solid rgba(103, 232, 249, 0.22);
+        color: var(--cyan);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+      }
+
+      .timer {
+        background: rgba(251, 146, 60, 0.09);
+        border: 1px solid rgba(251, 146, 60, 0.22);
+        color: var(--orange);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-weight: 900;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .question-area {
+        background: rgba(8, 13, 21, 0.4);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        min-height: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 18px;
+        margin-bottom: 18px;
+      }
+
+      .question-text {
+        margin: 0;
+        font-size: clamp(1.2rem, 1.8vw, 2.1rem);
+        line-height: 1.42;
+        text-align: center;
+        font-weight: 900;
+      }
+
+      .answers {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(200px, 1fr));
+        gap: 14px;
+        min-height: 260px;
+      }
+
+      .answer-btn {
+        width: 100%;
+        min-height: 100px;
+        text-align: left;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(38, 52, 74, 0.22));
+        color: var(--text);
+        font-size: 1.04rem;
+        font-weight: 800;
+        padding: 18px 16px;
+        cursor: pointer;
+        transition: transform 0.12s ease, border-color 0.12s ease;
+      }
+
+      .answer-btn:hover {
+        transform: translateY(-2px);
+        border-color: rgba(103, 232, 249, 0.45);
+      }
+
+      .answer-btn.correct {
+        background: linear-gradient(135deg, rgba(52, 211, 153, 0.28), rgba(52, 211, 153, 0.5));
+        border-color: rgba(52, 211, 153, 0.85);
+      }
+
+      .answer-btn.wrong {
+        background: linear-gradient(135deg, rgba(248, 113, 113, 0.26), rgba(248, 113, 113, 0.5));
+        border-color: rgba(248, 113, 113, 0.82);
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .selected-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 180px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: rgba(255,255,255,0.03);
+        font-weight: 800;
+      }
+
+      .trade-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.02);
+        border-top: 1px solid var(--line);
+      }
+
+      .section-box {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+        background: rgba(255,255,255,0.025);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+
+      .mini-label {
+        color: var(--muted);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 900;
+      }
+
+      select, input {
+        width: 100%;
+        background: rgba(9, 14, 22, 0.84);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 10px;
+        color: var(--text);
+        padding: 10px 12px;
+        font: inherit;
+        outline: none;
+      }
+
+      .player-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.025);
+        border: 1px solid var(--line);
+      }
+
+      .player-meta {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .player-name {
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .player-status {
+        color: var(--muted);
+        font-size: 0.72rem;
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        background: var(--green);
+        box-shadow: 0 0 12px rgba(52, 211, 153, 0.8);
+        margin-right: 6px;
+      }
+
+      .status-dot.offline {
+        background: var(--red);
+        box-shadow: 0 0 12px rgba(248, 113, 113, 0.8);
+      }
+
+      .market-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.025);
+        border: 1px solid var(--line);
+      }
+
+      .market-item .meta {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .price {
+        color: var(--gold);
+        font-weight: 900;
+      }
+
+      .trade-log-item {
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        color: var(--muted);
+        line-height: 1.45;
+        font-size: 0.9rem;
+      }
+
+      .toast {
+        position: fixed;
+        right: 20px;
+        top: 20px;
+        max-width: 340px;
+        background: rgba(12, 18, 30, 0.96);
+        border: 1px solid var(--line);
+        color: var(--text);
+        border-radius: 12px;
+        padding: 12px 14px;
+        box-shadow: 0 16px 28px rgba(0,0,0,0.28);
+        opacity: 0;
+        transform: translateY(-8px);
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @media (max-width: 1200px) {
+        html, body {
+          overflow: auto;
+        }
+
+        .main {
+          grid-template-columns: 1fr;
+        }
+
+        .answers {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">B</div>
+          <span>Blooket Trading Game</span>
+        </div>
+
+        <div class="stats-bar">
+          <div class="pill"><span>🪙</span> <span id="tokens">0</span></div>
+          <div class="pill"><span>⭐</span> <span id="xp">0</span></div>
+          <div class="pill"><span>🔥</span> <span id="streak">0</span></div>
+          <div class="pill"><span>🎒</span> <span id="inventoryCount">0</span></div>
+        </div>
+      </header>
+
+      <main class="main">
+        <aside class="panel">
+          <div class="panel-header">Inventory</div>
+          <div class="inventory-list" id="inventoryList"></div>
+        </aside>
+
+        <section class="panel center-panel">
+          <div class="game-box">
+            <div class="status-row">
+              <div class="round-badge" id="roundBadge">Round 1</div>
+              <div class="timer"><span>⏱️</span> <span id="timerValue">20</span></div>
+            </div>
+
+            <div class="question-area">
+              <p class="question-text" id="questionText">Loading question...</p>
+            </div>
+
+            <div class="answers" id="answers"></div>
+
+            <div class="controls">
+              <div class="button-row">
+                <button class="btn btn-primary" id="nextRoundBtn">Next round</button>
+                <button class="btn btn-secondary" id="shuffleBtn">Shuffle</button>
+              </div>
+
+              <div class="selected-box">
+                <span>🎯</span>
+                <span id="selectedBlookText">None</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="panel">
+          <div class="panel-header">Trade Hub</div>
+
+          <div class="trade-panel">
+            <div class="section-box">
+              <div class="mini-label">Player Profile</div>
+              <input id="playerNameInput" type="text" maxlength="16" placeholder="Your display name" />
+              <button class="btn btn-primary" id="saveProfileBtn">Save profile</button>
+            </div>
+
+            <div class="section-box">
+              <div class="mini-label">Trade Offer</div>
+              <select id="yourTradeSelect"></select>
+              <select id="targetTradeSelect"></select>
+              <button class="btn btn-success" id="proposeTradeBtn">Propose trade</button>
+            </div>
+
+            <div class="section-box">
+              <div class="mini-label">Market</div>
+              <select id="marketSelect"></select>
+              <button class="btn btn-warning" id="buyMarketBtn">Buy blook</button>
+            </div>
+
+            <div class="section-box">
+              <div class="mini-label">Online Players</div>
+              <div class="online-list" id="onlineList"></div>
+            </div>
+
+            <div class="section-box">
+              <div class="mini-label">Trade Log</div>
+              <div class="trade-log" id="tradeLog"></div>
+            </div>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+      (() => {
+        const STORAGE_KEY = "blooket_trading_game_v1";
+        const PLAYER_KEY = "blooket_trade_players_v1";
+        const CHANNEL_NAME = "blooket_trade_channel";
+        const channel = new BroadcastChannel(CHANNEL_NAME);
+
+        const BLOOK_LIBRARY = [
+          { id: "classic", name: "Classic", emoji: "🦄", rarity: "common", value: 25 },
+          { id: "sunny", name: "Sunny", emoji: "🌞", rarity: "common", value: 28 },
+          { id: "forest", name: "Forest", emoji: "🌿", rarity: "common", value: 30 },
+          { id: "bloom", name: "Bloom", emoji: "🌼", rarity: "common", value: 33 },
+          { id: "spark", name: "Spark", emoji: "✨", rarity: "common", value: 29 },
+          { id: "nebula", name: "Nebula", emoji: "🌌", rarity: "uncommon", value: 42 },
+          { id: "pixel", name: "Pixel", emoji: "🧩", rarity: "uncommon", value: 44 },
+          { id: "frost", name: "Frost", emoji: "❄️", rarity: "uncommon", value: 47 },
+          { id: "aurora", name: "Aurora", emoji: "🌈", rarity: "uncommon", value: 52 },
+          { id: "vibes", name: "Vibes", emoji: "🎶", rarity: "uncommon", value: 49 },
+          { id: "cyber", name: "Cyber", emoji: "🤖", rarity: "rare", value: 72 },
+          { id: "shadow", name: "Shadow", emoji: "🕶️", rarity: "rare", value: 75 },
+          { id: "royal", name: "Royal", emoji: "👑", rarity: "rare", value: 82 },
+          { id: "lava", name: "Lava", emoji: "🔥", rarity: "rare", value: 86 },
+          { id: "storm", name: "Storm", emoji: "⚡", rarity: "rare", value: 90 },
+          { id: "golem", name: "Golem", emoji: "🪨", rarity: "rare", value: 95 },
+          { id: "dragon", name: "Dragon", emoji: "🐉", rarity: "epic", value: 120 },
+          { id: "phoenix", name: "Phoenix", emoji: "🦅", rarity: "epic", value: 128 },
+          { id: "angel", name: "Angel", emoji: "👼", rarity: "epic", value: 116 },
+          { id: "demon", name: "Demon", emoji: "😈", rarity: "epic", value: 130 },
+          { id: "titan", name: "Titan", emoji: "🦾", rarity: "epic", value: 150 },
+          { id: "sapphire", name: "Sapphire", emoji: "💠", rarity: "epic", value: 138 },
+          { id: "crystal", name: "Crystal", emoji: "💎", rarity: "legendary", value: 185 },
+          { id: "vortex", name: "Vortex", emoji: "🌀", rarity: "legendary", value: 190 },
+          { id: "nova", name: "Nova", emoji: "☄️", rarity: "legendary", value: 210 },
+          { id: "cosmic", name: "Cosmic", emoji: "🌠", rarity: "legendary", value: 220 },
+          { id: "mecha", name: "Mecha", emoji: "🚀", rarity: "legendary", value: 205 },
+          { id: "void", name: "Void", emoji: "🌑", rarity: "mythic", value: 280 },
+          { id: "celestial", name: "Celestial", emoji: "✨", rarity: "mythic", value: 320 },
+          { id: "mythic", name: "Mythic", emoji: "🛡️", rarity: "mythic", value: 340 }
+        ];
+
+        const QUESTION_SET = [
+          { prompt: "Which planet is known as the Red Planet?", choices: ["Venus", "Mars", "Jupiter", "Mercury"], answer: 1 },
+          { prompt: "What is 12 x 8?", choices: ["84", "96", "108", "92"], answer: 1 },
+          { prompt: "What is the capital of France?", choices: ["Rome", "Berlin", "Paris", "Madrid"], answer: 2 },
+          { prompt: "What language styles web pages?", choices: ["Python", "Java", "CSS", "SQL"], answer: 2 },
+          { prompt: "Which animal is the largest mammal?", choices: ["Elephant", "Whale", "Giraffe", "Shark"], answer: 1 },
+          { prompt: "Who wrote Romeo and Juliet?", choices: ["Dickens", "Shakespeare", "Austen", "Twain"], answer: 1 },
+          { prompt: "What gas do plants use?", choices: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], answer: 1 },
+          { prompt: "What is 15 + 27?", choices: ["40", "38", "42", "32"], answer: 1 },
+          { prompt: "Which is the biggest ocean?", choices: ["Atlantic", "Arctic", "Indian", "Pacific"], answer: 3 },
+          { prompt: "Which organ pumps blood?", choices: ["Lungs", "Liver", "Heart", "Brain"], answer: 2 },
+          { prompt: "How many sides does a hexagon have?", choices: ["5", "6", "7", "8"], answer: 1 },
+          { prompt: "What is 10^2?", choices: ["10", "100", "1000", "20"], answer: 1 },
+          { prompt: "Which continent is the Sahara in?", choices: ["Africa", "Asia", "Europe", "Australia"], answer: 0 },
+          { prompt: "Which country has the pyramids?", choices: ["Mexico", "Egypt", "Greece", "Japan"], answer: 1 },
+          { prompt: "Which bird can mimic speech?", choices: ["Parrot", "Owl", "Penguin", "Falcon"], answer: 0 },
+          { prompt: "What is the freezing point of water in Celsius?", choices: ["10", "32", "0", "100"], answer: 2 },
+          { prompt: "Which metal is liquid at room temperature?", choices: ["Iron", "Copper", "Mercury", "Gold"], answer: 2 },
+          { prompt: "What is the smallest prime number?", choices: ["1", "2", "3", "5"], answer: 1 },
+          { prompt: "Which is the hardest natural substance?", choices: ["Quartz", "Diamond", "Steel", "Gold"], answer: 1 },
+          { prompt: "How many days in a leap year?", choices: ["364", "365", "366", "367"], answer: 2 }
+        ];
+
+        const refs = {};
+        let timerHandle = null;
+        let answered = false;
+
+        const state = {
+          round: 1,
+          timer: 20,
+          currentQuestion: null,
+          usedQuestions: [],
+          market: [],
+          tradeLog: [],
+          onlinePlayers: [],
+          player: null,
+          selectedBlookId: null
+        };
+
+        function randomId(prefix = "id") {
+          return `${prefix}_${Math.random().toString(36).slice(2, 9)}_${Date.now().toString(36)}`;
+        }
+
+        function clone(obj) {
+          return JSON.parse(JSON.stringify(obj));
+        }
+
+        function toast(message) {
+          const el = document.getElementById("toast");
+          el.textContent = message;
+          el.classList.add("show");
+          clearTimeout(toast.timer);
+          toast.timer = setTimeout(() => el.classList.remove("show"), 2200);
+        }
+
+        function getBlookById(id) {
+          return BLOOK_LIBRARY.find((b) => b.id === id) || null;
+        }
+
+        function getPlayersRegistry() {
+          const value = localStorage.getItem(PLAYER_KEY);
+          if (!value) return {};
+          try { return JSON.parse(value); } catch { return {}; }
+        }
+
+        function savePlayersRegistry(players) {
+          localStorage.setItem(PLAYER_KEY, JSON.stringify(players));
+        }
+
+        function createPlayerProfile() {
+          const profile = {
+            id: randomId("player"),
+            name: "Player",
+            tokens: 250,
+            xp: 0,
+            streak: 0,
+            inventory: [],
+            selectedBlookId: null,
+            tradeLog: ["Welcome to the trading arena!"],
+            updatedAt: Date.now()
+          };
+
+          for (let i = 0; i < 8; i++) {
+            const blook = BLOOK_LIBRARY[Math.floor(Math.random() * BLOOK_LIBRARY.length)];
+            profile.inventory.push({
+              id: blook.id,
+              name: blook.name,
+              emoji: blook.emoji,
+              rarity: blook.rarity,
+              value: blook.value
+            });
+          }
+
+          profile.selectedBlookId = profile.inventory[0]?.id || null;
+          return profile;
+        }
+
+        function saveCurrentPlayer() {
+          const registry = getPlayersRegistry();
+          registry[state.player.id] = {
+            ...state.player,
+            updatedAt: Date.now(),
+            online: true
+          };
+          savePlayersRegistry(registry);
+        }
+
+        function removeCurrentPlayer() {
+          const registry = getPlayersRegistry();
+          delete registry[state.player.id];
+          savePlayersRegistry(registry);
+        }
+
+        function saveLocalState() {
+          const payload = {
+            player: state.player,
+            round: state.round,
+            currentQuestion: state.currentQuestion,
+            usedQuestions: state.usedQuestions,
+            timer: state.timer,
+            selectedBlookId: state.selectedBlookId,
+            tradeLog: state.tradeLog
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        }
+
+        function loadLocalState() {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return null;
+          try { return JSON.parse(raw); } catch { return null; }
+        }
+
+        function addTradeLog(message) {
+          state.tradeLog.push(message);
+          if (state.tradeLog.length > 30) {
+            state.tradeLog = state.tradeLog.slice(-30);
+          }
+          renderTradeLog();
+        }
+
+        function renderTradeLog() {
+          const list = refs.tradeLog;
+          list.innerHTML = "";
+
+          if (!state.tradeLog.length) {
+            list.innerHTML = '<div class="trade-log-item">No trade activity just yet.</div>';
+            return;
+          }
+
+          [...state.tradeLog].slice(-8).reverse().forEach((entry) => {
+            const item = document.createElement("div");
+            item.className = "trade-log-item";
+            item.textContent = entry;
+            list.appendChild(item);
+          });
+        }
+
+        function renderStats() {
+          refs.tokens.textContent = state.player.tokens;
+          refs.xp.textContent = state.player.xp;
+          refs.streak.textContent = state.player.streak;
+          refs.inventoryCount.textContent = state.player.inventory.length;
+          refs.roundBadge.textContent = `Round ${state.round}`;
+        }
+
+        function updateSelectedLabel() {
+          const selected = state.player.inventory.find((item) => item.id === state.selectedBlookId);
+          refs.selectedBlookText.textContent = selected ? `${selected.emoji} ${selected.name}` : "None";
+        }
+
+        function addBlookToInventory(blookId) {
+          const source = getBlookById(blookId);
+          if (!source) return;
+
+          const already = state.player.inventory.some((item) => item.id === source.id);
+          if (!already) {
+            state.player.inventory.push({
+              id: source.id,
+              name: source.name,
+              emoji: source.emoji,
+              rarity: source.rarity,
+              value: source.value
+            });
+          }
+
+          if (!state.player.selectedBlookId) {
+            state.player.selectedBlookId = source.id;
+            state.selectedBlookId = source.id;
+          }
+
+          renderInventory();
+          renderTradeSelectors();
+          updateSelectedLabel();
+          renderStats();
+          saveCurrentPlayer();
+          saveLocalState();
+        }
+
+        function sellBlook(id) {
+          const item = state.player.inventory.find((b) => b.id === id);
+          if (!item) return;
+
+          const payout = Math.max(12, Math.round(item.value * 0.7));
+          state.player.tokens += payout;
+          state.player.inventory = state.player.inventory.filter((b) => b.id !== id);
+
+          if (state.player.selectedBlookId === id) {
+            state.player.selectedBlookId = state.player.inventory[0]?.id || null;
+            state.selectedBlookId = state.player.selectedBlookId;
+          }
+
+          addTradeLog(`Sold ${item.name} for ${payout} tokens.`);
+          renderInventory();
+          renderTradeSelectors();
+          updateSelectedLabel();
+          renderStats();
+          saveCurrentPlayer();
+          saveLocalState();
+        }
+
+        function renderInventory() {
+          const list = refs.inventoryList;
+          list.innerHTML = "";
+
+          if (!state.player.inventory.length) {
+            list.innerHTML = '<div class="trade-log-item">Your inventory is empty. You can win rounds or buy blooks to fill it.</div>';
+            return;
+          }
+
+          const sorted = [...state.player.inventory].sort((a, b) => {
+            const rarityOrder = { common: 1, uncommon: 2, rare: 3, epic: 4, legendary: 5, mythic: 6 };
+            return (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0) || b.value - a.value;
+          });
+
+          sorted.forEach((blook) => {
+            const card = document.createElement("div");
+            const selected = state.player.selectedBlookId === blook.id;
+            card.className = "blook-card" + (selected ? " selected" : "");
+
+            card.innerHTML = `
+              <div class="blook-icon">${blook.emoji}</div>
+              <div class="blook-main">
+                <div class="blook-name">${blook.name}</div>
+                <div class="blook-info">
+                  <span class="rarity ${blook.rarity}">${blook.rarity}</span>
+                  <span>Value: ${blook.value}</span>
+                </div>
+                <div class="blook-actions">
+                  <button class="btn btn-secondary" data-action="select" data-id="${blook.id}">Select</button>
+                  <button class="btn btn-warning" data-action="sell" data-id="${blook.id}">Sell</button>
+                </div>
+              </div>
+            `;
+
+            card.addEventListener("click", (event) => {
+              const actionEl = event.target.closest("[data-action]");
+              if (!actionEl) {
+                state.player.selectedBlookId = blook.id;
+                state.selectedBlookId = blook.id;
+                renderInventory();
+                renderTradeSelectors();
+                updateSelectedLabel();
+                saveCurrentPlayer();
+                return;
+              }
+
+              const action = actionEl.dataset.action;
+              const id = actionEl.dataset.id;
+
+              if (action === "select") {
+                state.player.selectedBlookId = id;
+                state.selectedBlookId = id;
+                renderInventory();
+                renderTradeSelectors();
+                updateSelectedLabel();
+                saveCurrentPlayer();
+              }
+
+              if (action === "sell") {
+                sellBlook(id);
+              }
+            });
+
+            list.appendChild(card);
+          });
+        }
+
+        function renderTradeSelectors() {
+          const yours = refs.yourTradeSelect;
+          const targets = refs.targetTradeSelect;
+          yours.innerHTML = "";
+          targets.innerHTML = "";
+
+          if (!state.player.inventory.length) {
+            const placeholder = document.createElement("option");
+            placeholder.value = "";
+            placeholder.textContent = "No blooks";
+            yours.appendChild(placeholder.cloneNode(true));
+            targets.appendChild(placeholder.cloneNode(true));
+            return;
+          }
+
+          const options = state.player.inventory.map((item) => {
+            const opt = document.createElement("option");
+            opt.value = item.id;
+            opt.textContent = `${item.emoji} ${item.name}`;
+            return opt;
+          });
+
+          options.forEach((opt) => {
+            yours.appendChild(opt.cloneNode(true));
+            targets.appendChild(opt.cloneNode(true));
+          });
+
+          if (state.player.selectedBlookId) {
+            yours.value = state.player.selectedBlookId;
+          }
+
+          if (options.length > 1) {
+            targets.value = options[1].value;
+          }
+        }
+
+        function getRandomQuestion() {
+          const unused = QUESTION_SET.filter((q) => !state.usedQuestions.includes(q.prompt));
+          const pool = unused.length ? unused : QUESTION_SET;
+          const q = pool[Math.floor(Math.random() * pool.length)];
+          state.usedQuestions.push(q.prompt);
+          if (state.usedQuestions.length > QUESTION_SET.length) {
+            state.usedQuestions = state.usedQuestions.slice(-QUESTION_SET.length);
+          }
+          state.currentQuestion = q;
+          return q;
+        }
+
+        function renderQuestion() {
+          const question = state.currentQuestion || getRandomQuestion();
+          refs.questionText.textContent = question.prompt;
+
+          refs.answers.innerHTML = "";
+          question.choices.forEach((choice, index) => {
+            const btn = document.createElement("button");
+            btn.className = "answer-btn";
+            btn.textContent = `${String.fromCharCode(65 + index)}) ${choice}`;
+            btn.dataset.index = String(index);
+            btn.addEventListener("click", () => {
+              if (answered) return;
+              answered = true;
+              handleAnswer(index);
+            });
+            refs.answers.appendChild(btn);
+          });
+        }
+
+        function handleAnswer(selectedIndex) {
+          const question = state.currentQuestion;
+          const buttons = [...document.querySelectorAll(".answer-btn")];
+
+          buttons.forEach((button) => {
+            const index = Number(button.dataset.index);
+            if (index === question.answer) {
+              button.classList.add("correct");
+            }
+            if (index === selectedIndex && index !== question.answer) {
+              button.classList.add("wrong");
+            }
+          });
+
+          if (selectedIndex === question.answer) {
+            const reward = 35 + state.round * 8;
+            state.player.tokens += reward;
+            state.player.xp += 15;
+            state.player.streak += 1;
+            addTradeLog(`Correct answer! +${reward} tokens and +15 XP.`);
+          } else {
+            state.player.tokens = Math.max(0, state.player.tokens - 10);
+            state.player.streak = 0;
+            addTradeLog("Wrong answer. -10 tokens.");
+          }
+
+          if (state.player.streak > 0 && state.player.streak % 3 === 0) {
+            const bonus = BLOOK_LIBRARY[Math.floor(Math.random() * BLOOK_LIBRARY.length)];
+            addBlookToInventory(bonus.id);
+            addTradeLog(`Streak bonus! You earned a ${bonus.name} blook.`);
+          }
+
+          renderStats();
+          saveCurrentPlayer();
+          saveLocalState();
+          clearInterval(timerHandle);
+          refs.timerValue.textContent = "0";
+        }
+
+        function startTimer() {
+          clearInterval(timerHandle);
+          answered = false;
+          state.timer = 20;
+          refs.timerValue.textContent = String(state.timer);
+
+          timerHandle = setInterval(() => {
+            state.timer -= 1;
+            refs.timerValue.textContent = String(Math.max(0, state.timer));
+
+            if (state.timer <= 0) {
+              clearInterval(timerHandle);
+              if (!answered) {
+                answered = true;
+                const q = state.currentQuestion;
+                const buttons = [...document.querySelectorAll(".answer-btn")];
+                buttons.forEach((button) => {
+                  const index = Number(button.dataset.index);
+                  if (index === q.answer) button.classList.add("correct");
+                });
+
+                state.player.tokens = Math.max(0, state.player.tokens - 8);
+                state.player.streak = 0;
+                addTradeLog("Time ran out. -8 tokens.");
+                renderStats();
+                saveCurrentPlayer();
+                saveLocalState();
+              }
+            }
+          }, 1000);
+        }
+
+        function nextRound() {
+          state.round += 1;
+          state.currentQuestion = getRandomQuestion();
+          renderQuestion();
+          startTimer();
+          renderStats();
+          saveLocalState();
+        }
+
+        function shuffleQuestion() {
+          state.currentQuestion = getRandomQuestion();
+          renderQuestion();
+          startTimer();
+          saveLocalState();
+        }
+
+        function generateMarket() {
+          state.market = [];
+          for (let i = 0; i < 7; i++) {
+            const blook = BLOOK_LIBRARY[Math.floor(Math.random() * BLOOK_LIBRARY.length)];
+            state.market.push({
+              id: `${blook.id}_${Math.random().toString(36).slice(2, 8)}`,
+              itemId: blook.id,
+              name: blook.name,
+              emoji: blook.emoji,
+              rarity: blook.rarity,
+              value: blook.value
+            });
+          }
+          renderMarket();
+        }
+
+        function renderMarket() {
+          const select = refs.marketSelect;
+          select.innerHTML = "";
+
+          const placeholder = document.createElement("option");
+          placeholder.value = "";
+          placeholder.textContent = "Select a market blook";
+          select.appendChild(placeholder);
+
+          state.market.forEach((item) => {
+            const option = document.createElement("option");
+            option.value = item.id;
+            option.textContent = `${item.emoji} ${item.name} — ${item.value} tokens`;
+            select.appendChild(option);
+          });
+
+          if (state.market.length > 0) {
+            select.value = state.market[0].id;
+          }
+        }
+
+        function buyMarketBlook() {
+          const selectedId = refs.marketSelect.value;
+          if (!selectedId) {
+            toast("Choose a blook from the market first.");
+            return;
+          }
+
+          const item = state.market.find((entry) => entry.id === selectedId);
+          if (!item) {
+            toast("That market item is no longer available.");
+            return;
+          }
+
+          if (state.player.tokens < item.value) {
+            toast("Not enough tokens.");
+            return;
+          }
+
+          state.player.tokens -= item.value;
+          const source = getBlookById(item.itemId);
+          if (!source) {
+            toast("Could not find that blook.");
+            return;
+          }
+
+          const hasOne = state.player.inventory.some((b) => b.id === source.id);
+          if (!hasOne) {
+            state.player.inventory.push({
+              id: source.id,
+              name: source.name,
+              emoji: source.emoji,
+              rarity: source.rarity,
+              value: source.value
+            });
+          }
+
+          state.market = state.market.filter((entry) => entry.id !== item.id);
+          addTradeLog(`Bought ${source.name} for ${item.value} tokens.`);
+          renderInventory();
+          renderTradeSelectors();
+          renderMarket();
+          updateSelectedLabel();
+          renderStats();
+          saveCurrentPlayer();
+          saveLocalState();
+        }
+
+        function renderOnlinePlayers() {
+          const list = refs.onlineList;
+          list.innerHTML = "";
+
+          if (!state.onlinePlayers.length) {
+            list.innerHTML = '<div class="trade-log-item">No other players online right now.</div>';
+            return;
+          }
+
+          state.onlinePlayers.forEach((player) => {
+            const row = document.createElement("div");
+            row.className = "player-card";
+
+            row.innerHTML = `
+              <div class="player-meta">
+                <div class="player-name"><span class="status-dot ${(player.online ? "" : "offline")}"></span>${player.name}</div>
+                <div class="player-status">${player.inventory?.length || 0} blooks • ${player.tokens || 0} tokens</div>
+              </div>
+              <button class="btn btn-secondary" data-player-id="${player.id}">Trade</button>
+            `;
+
+            const btn = row.querySelector("button");
+            btn.addEventListener("click", () => sendTradeRequest(player.id, player.name));
+
+            list.appendChild(row);
+          });
+        }
+
+        function refreshOnlinePlayers() {
+          const registry = getPlayersRegistry();
+          const now = Date.now();
+          const players = Object.values(registry)
+            .filter((player) => player && player.id && player.id !== state.player.id)
+            .map((player) => ({
+              ...player,
+              online: now - (player.updatedAt || 0) < 20000
+            }));
+
+          state.onlinePlayers = players;
+          renderOnlinePlayers();
+        }
+
+        function sendTradeRequest(targetId, targetName) {
+          const payload = {
+            type: "tradeRequest",
+            trade: {
+              id: randomId("trade"),
+              from: state.player.id,
+              fromName: state.player.name,
+              to: targetId,
+              toName: targetName,
+              offerFrom: [],
+              offerTo: [],
+              status: "pending"
+            }
+          };
+          channel.postMessage(payload);
+          localStorage.setItem(`blooket_pending_${targetId}`, JSON.stringify(payload));
+          addTradeLog(`Trade request sent to ${targetName}.`);
+          toast(`Trade sent to ${targetName}.`);
+        }
+
+        function handleTradeRequestMessage(payload) {
+          const trade = payload.trade;
+          if (!trade || trade.to !== state.player.id) return;
+
+          const accept = confirm(`${trade.fromName} wants to trade with you. Accept?`);
+          if (!accept) {
+            addTradeLog(`${trade.fromName} sent a trade request and it was declined.`);
+            return;
+          }
+
+          const registry = getPlayersRegistry();
+          const sender = registry[trade.from];
+          if (!sender) {
+            toast("Trade partner is offline.");
+            return;
+          }
+
+          const modal = document.createElement("div");
+          modal.style.position = "fixed";
+          modal.style.inset = "0";
+          modal.style.background = "rgba(0,0,0,0.54)";
+          modal.style.display = "grid";
+          modal.style.placeItems = "center";
+          modal.style.zIndex = "1000";
+
+          const box = document.createElement("div");
+          box.style.width = "min(680px, 92vw)";
+          box.style.background = "rgba(18, 28, 44, 0.98)";
+          box.style.border = "1px solid rgba(255,255,255,0.08)";
+          box.style.borderRadius = "18px";
+          box.style.padding = "20px";
+          box.style.boxShadow = "0 20px 44px rgba(0,0,0,0.35)";
+
+          const title = document.createElement("h2");
+          title.textContent = `Trade with ${trade.fromName}`;
+          title.style.margin = "0 0 16px";
+          title.style.fontSize = "1.5rem";
+
+          const grid = document.createElement("div");
+          grid.style.display = "grid";
+          grid.style.gridTemplateColumns = "1fr 1fr";
+          grid.style.gap = "12px";
+
+          const yourSide = document.createElement("div");
+          yourSide.style.padding = "12px";
+          yourSide.style.border = "1px solid rgba(255,255,255,0.08)";
+          yourSide.style.borderRadius = "12px";
+          yourSide.style.background = "rgba(255,255,255,0.02)";
+
+          const theirSide = document.createElement("div");
+          theirSide.style.padding = "12px";
+          theirSide.style.border = "1px solid rgba(255,255,255,0.08)";
+          theirSide.style.borderRadius = "12px";
+          theirSide.style.background = "rgba(255,255,255,0.02)";
+
+          const labelYou = document.createElement("div");
+          labelYou.textContent = "You offer";
+          labelYou.style.fontSize = "0.72rem";
+          labelYou.style.textTransform = "uppercase";
+          labelYou.style.letterSpacing = "0.12em";
+          labelYou.style.color = "var(--muted)";
+          labelYou.style.marginBottom = "8px";
+          yourSide.appendChild(labelYou);
+
+          const labelThem = document.createElement("div");
+          labelThem.textContent = `${trade.fromName} offers`;
+          labelThem.style.fontSize = "0.72rem";
+          labelThem.style.textTransform = "uppercase";
+          labelThem.style.letterSpacing = "0.12em";
+          labelThem.style.color = "var(--muted)";
+          labelThem.style.marginBottom = "8px";
+          theirSide.appendChild(labelThem);
+
+          const yourSelect = document.createElement("select");
+          const theirSelect = document.createElement("select");
+
+          const myInventory = state.player.inventory;
+          const theirInventory = sender.inventory || [];
+
+          if (!myInventory.length || !theirInventory.length) {
+            toast("One side of this trade has no blooks available.");
+            return;
+          }
+
+          myInventory.forEach((item) => {
+            const opt = document.createElement("option");
+            opt.value = item.id;
+            opt.textContent = `${item.emoji} ${item.name}`;
+            yourSelect.appendChild(opt);
+          });
+
+          theirInventory.forEach((item) => {
+            const opt = document.createElement("option");
+            opt.value = item.id;
+            opt.textContent = `${item.emoji} ${item.name}`;
+            theirSelect.appendChild(opt);
+          });
+
+          yourSide.appendChild(yourSelect);
+          theirSide.appendChild(theirSelect);
+          grid.appendChild(yourSide);
+          grid.appendChild(theirSide);
+
+          const actions = document.createElement("div");
+          actions.style.display = "flex";
+          actions.style.justifyContent = "flex-end";
+          actions.style.gap = "10px";
+          actions.style.marginTop = "16px";
+
+          const cancelBtn = document.createElement("button");
+          cancelBtn.textContent = "Cancel";
+          cancelBtn.className = "btn btn-secondary";
+          cancelBtn.addEventListener("click", () => modal.remove());
+
+          const acceptBtn = document.createElement("button");
+          acceptBtn.textContent = "Accept trade";
+          acceptBtn.className = "btn btn-success";
+          acceptBtn.addEventListener("click", () => {
+            const myOfferId = yourSelect.value;
+            const theirOfferId = theirSelect.value;
+            if (!myOfferId || !theirOfferId) {
+              toast("Choose both sides of the trade.");
+              return;
+            }
+
+            const tradePayload = {
+              type: "tradeAccepted",
+              trade: {
+                id: trade.id,
+                from: trade.from,
+                to: state.player.id,
+                fromName: trade.fromName,
+                toName: state.player.name,
+                offerFrom: [theirOfferId],
+                offerTo: [myOfferId]
+              }
+            };
+
+            channel.postMessage(tradePayload);
+            executeTradeSwap(tradePayload.trade);
+            modal.remove();
+            toast(`Trade accepted: ${myOfferId} for ${theirOfferId}`);
+          });
+
+          actions.appendChild(cancelBtn);
+          actions.appendChild(acceptBtn);
+          box.appendChild(title);
+          box.appendChild(grid);
+          box.appendChild(actions);
+          modal.appendChild(box);
+          document.body.appendChild(modal);
+        }
+
+        function executeTradeSwap(trade) {
+          const registry = getPlayersRegistry();
+          const sender = registry[trade.from];
+          const receiver = registry[trade.to];
+          if (!sender || !receiver) {
+            toast("One player is offline or unavailable.");
+            return;
+          }
+
+          const senderInventory = sender.inventory || [];
+          const receiverInventory = receiver.inventory || [];
+
+          const senderOffer = senderInventory.find((item) => item.id === trade.offerFrom[0]);
+          const receiverOffer = receiverInventory.find((item) => item.id === trade.offerTo[0]);
+
+          if (!senderOffer || !receiverOffer) {
+            toast("One selected blook is no longer available.");
+            return;
+          }
+
+          sender.inventory = senderInventory.filter((item) => item.id !== senderOffer.id);
+          receiver.inventory = receiverInventory.filter((item) => item.id !== receiverOffer.id);
+          sender.inventory.push(clone(receiverOffer));
+          receiver.inventory.push(clone(senderOffer));
+
+          sender.tradeLog = Array.isArray(sender.tradeLog) ? sender.tradeLog : ["Trade completed."];
+          receiver.tradeLog = Array.isArray(receiver.tradeLog) ? receiver.tradeLog : ["Trade completed."];
+
+          sender.tradeLog.push(`Traded ${senderOffer.name} for ${receiverOffer.name}`);
+          receiver.tradeLog.push(`Traded ${receiverOffer.name} for ${senderOffer.name}`);
+
+          registry[trade.from] = sender;
+          registry[trade.to] = receiver;
+          savePlayersRegistry(registry);
+
+          if (state.player.id === trade.from) {
+            state.player.inventory = sender.inventory;
+            state.player.tradeLog = sender.tradeLog;
+          }
+          if (state.player.id === trade.to) {
+            state.player.inventory = receiver.inventory;
+            state.player.tradeLog = receiver.tradeLog;
+          }
+
+          addTradeLog(`Trade complete: ${senderOffer.name} for ${receiverOffer.name}`);
+          renderInventory();
+          renderTradeSelectors();
+          updateSelectedLabel();
+          renderStats();
+          saveCurrentPlayer();
+          saveLocalState();
+          refreshOnlinePlayers();
+        }
+
+        function saveProfile() {
+          const name = refs.playerNameInput.value.trim() || "Player";
+          state.player.name = name.slice(0, 16);
+          refs.playerNameInput.value = state.player.name;
+          saveCurrentPlayer();
+          refreshOnlinePlayers();
+          toast(`Profile saved as ${state.player.name}.`);
+        }
+
+        function proposeTrade() {
+          const yourId = refs.yourTradeSelect.value;
+          const targetId = refs.targetTradeSelect.value;
+
+          if (!yourId || !targetId) {
+            toast("Choose two blooks to trade.");
+            return;
+          }
+
+          if (yourId === targetId) {
+            toast("Choose two different blooks.");
+            return;
+          }
+
+          const online = state.onlinePlayers;
+          if (!online.length) {
+            toast("No other players are online. Open another tab to simulate multiplayer trading.");
+            return;
+          }
+
+          const target = online[0];
+          const myItem = state.player.inventory.find((item) => item.id === yourId);
+          const theirItem = (target.inventory || []).find((item) => item.id === targetId) || null;
+
+          if (!myItem || !theirItem) {
+            toast("Selected blooks are invalid for trade.");
+            return;
+          }
+
+          const payload = {
+            type: "tradeRequest",
+            trade: {
+              id: randomId("trade"),
+              from: state.player.id,
+              fromName: state.player.name,
+              to: target.id,
+              toName: target.name,
+              offerFrom: [theirItem.id],
+              offerTo: [myItem.id],
+              status: "pending"
+            }
+          };
+
+          channel.postMessage(payload);
+          localStorage.setItem(`blooket_pending_${target.id}`, JSON.stringify(payload));
+          addTradeLog(`Trade proposed: ${myItem.name} for ${theirItem.name}`);
+          toast(`Trade offered to ${target.name}.`);
+        }
+
+        function handleStorageEvent(event) {
+          if (event.key === PLAYER_KEY) {
+            refreshOnlinePlayers();
+          }
+
+          if (event.key && event.key.startsWith("blooket_pending_")) {
+            const raw = event.newValue;
+            if (!raw) return;
+            try {
+              const payload = JSON.parse(raw);
+              if (payload?.type === "tradeRequest") {
+                handleTradeRequestMessage(payload);
+              }
+            } catch {}
+          }
+        }
+
+        function setupBroadcast() {
+          channel.onmessage = (event) => {
+            const payload = event.data;
+            if (!payload || !payload.type) return;
+            if (payload.type === "tradeRequest") handleTradeRequestMessage(payload);
+            if (payload.type === "tradeAccepted") executeTradeSwap(payload.trade);
+          };
+        }
+
+        function bootstrapPlayer() {
+          const saved = loadLocalState();
+          const registry = getPlayersRegistry();
+          let profile = saved?.player || createPlayerProfile();
+
+          if (!profile.id) profile.id = randomId("player");
+          if (saved?.player && registry[profile.id]) {
+            profile = { ...profile, ...registry[profile.id] };
+          }
+
+          state.player = profile;
+          state.player.inventory = Array.isArray(state.player.inventory) ? state.player.inventory : [];
+          state.player.tradeLog = Array.isArray(state.player.tradeLog) ? state.player.tradeLog : ["Welcome to the trading arena!"];
+          state.tradeLog = state.player.tradeLog;
+          state.selectedBlookId = state.player.selectedBlookId || state.player.inventory[0]?.id || null;
+          state.player.selectedBlookId = state.selectedBlookId;
+          refs.playerNameInput.value = state.player.name;
+          saveCurrentPlayer();
+        }
+
+        function attachEvents() {
+          refs.nextRoundBtn.addEventListener("click", nextRound);
+          refs.shuffleBtn.addEventListener("click", shuffleQuestion);
+          refs.saveProfileBtn.addEventListener("click", saveProfile);
+          refs.buyMarketBtn.addEventListener("click", buyMarketBlook);
+          refs.proposeTradeBtn.addEventListener("click", proposeTrade);
+        }
+
+        function initRefs() {
+          refs.tokens = document.getElementById("tokens");
+          refs.xp = document.getElementById("xp");
+          refs.streak = document.getElementById("streak");
+          refs.inventoryCount = document.getElementById("inventoryCount");
+          refs.inventoryList = document.getElementById("inventoryList");
+          refs.roundBadge = document.getElementById("roundBadge");
+          refs.timerValue = document.getElementById("timerValue");
+          refs.questionText = document.getElementById("questionText");
+          refs.answers = document.getElementById("answers");
+          refs.selectedBlookText = document.getElementById("selectedBlookText");
+          refs.nextRoundBtn = document.getElementById("nextRoundBtn");
+          refs.shuffleBtn = document.getElementById("shuffleBtn");
+          refs.playerNameInput = document.getElementById("playerNameInput");
+          refs.saveProfileBtn = document.getElementById("saveProfileBtn");
+          refs.marketSelect = document.getElementById("marketSelect");
+          refs.buyMarketBtn = document.getElementById("buyMarketBtn");
+          refs.proposeTradeBtn = document.getElementById("proposeTradeBtn");
+          refs.onlineList = document.getElementById("onlineList");
+          refs.tradeLog = document.getElementById("tradeLog");
+          refs.yourTradeSelect = document.getElementById("yourTradeSelect");
+          refs.targetTradeSelect = document.getElementById("targetTradeSelect");
+        }
+
+        function setup() {
+          initRefs();
+          bootstrapPlayer();
+          attachEvents();
+          setupBroadcast();
+
+          state.currentQuestion = getRandomQuestion();
+          renderQuestion();
+          renderInventory();
+          renderTradeSelectors();
+          renderTradeLog();
+          renderStats();
+          updateSelectedLabel();
+          generateMarket();
+          refreshOnlinePlayers();
+
+          window.addEventListener("storage", handleStorageEvent);
+          window.addEventListener("beforeunload", removeCurrentPlayer);
+          setInterval(() => {
+            saveCurrentPlayer();
+            refreshOnlinePlayers();
+            saveLocalState();
+          }, 5000);
+
+          startTimer();
+        }
+
+        setup();
+      })();
+    </script>
+  </body>
+</html>
